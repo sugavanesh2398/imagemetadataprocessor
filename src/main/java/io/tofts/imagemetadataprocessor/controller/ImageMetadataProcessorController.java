@@ -23,7 +23,7 @@ import java.util.List;
 public class ImageMetadataProcessorController {
     HashMap<String, List<String>> metadata=new HashMap<>();
 
-    @GetMapping("/imagemetadataprocessor")
+    @PostMapping("/imagemetadataprocessor")
     public HashMap<String, List<String>> GetImageMetadata(@RequestParam("file") MultipartFile filePath) throws IOException, ImageProcessingException, JSONException {
 
         System.out.println("%%%%%%%%%%");
