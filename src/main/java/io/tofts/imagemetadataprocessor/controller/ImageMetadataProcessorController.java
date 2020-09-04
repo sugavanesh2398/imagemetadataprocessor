@@ -7,12 +7,14 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,13 +23,16 @@ import java.util.List;
 public class ImageMetadataProcessorController {
     HashMap<String, List<String>> metadata=new HashMap<>();
 
-    @RequestMapping("imagemetadataprocessor")
-    @ResponseBody
-    public String GetImageMetadata(@RequestBody String filePath) throws IOException, ImageProcessingException, JSONException {
-        System.out.println("%%%%%%%%%%"+filePath);
-        JSONObject json=new JSONObject(filePath);
-        InputStream imageFile = new FileInputStream(json.getString("filePath"));
-        Metadata meta= ImageMetadataReader.readMetadata(imageFile);
+    @GetMapping("/imagemetadataprocessor")
+    public HashMap<String, List<String>> GetImageMetadata(@RequestParam("file") MultipartFile filePath) throws IOException, ImageProcessingException, JSONException {
+
+        System.out.println("%%%%%%%%%%");
+        File convFile = new File( filePath.getOriginalFilename() );
+        FileOutputStream fos = new FileOutputStream( convFile );
+        fos.write( filePath.getBytes() );
+        fos.close();
+        System.out.println("%%%%%%%%%%"+convFile.getName());
+        Metadata meta= ImageMetadataReader.readMetadata(convFile);
         for (Directory directory : meta.getDirectories()){
             System.out.println("  directory=" + directory);
             List<String> listTag=new ArrayList<>();
@@ -38,6 +43,6 @@ public class ImageMetadataProcessorController {
             metadata.put(directory.toString(),listTag);
         }
 
-        return filePath;
+        return metadata;
     }
 }
