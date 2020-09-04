@@ -21,21 +21,21 @@ import java.util.List;
 public class ImageMetadataProcessorController {
     HashMap<String, List<String>> metadata=new HashMap<>();
 
-    @GetMapping("/getimagemetadata/{filePath}")
-    public String GetImageMetadata(@PathVariable String filePath) throws IOException, ImageProcessingException, JSONException {
-//        System.out.println("%%%%%%%%%%"+filePath);
-//        JSONObject json=new JSONObject(filePath);
-//        InputStream imageFile = new FileInputStream(json.getString("filePath"));
-//        Metadata meta= ImageMetadataReader.readMetadata(imageFile);
-//        for (Directory directory : meta.getDirectories()){
-//            System.out.println("  directory=" + directory);
-//            List<String> listTag=new ArrayList<>();
-//            for (Tag tag : directory.getTags()) {
-//                System.out.println("    tag=" + tag);
-//                listTag.add(tag.toString());
-//            }
-//            metadata.put(directory.toString(),listTag);
-//        }
+    @GetMapping("/getimagemetadata")
+    public String GetImageMetadata(@RequestBody String filePath) throws IOException, ImageProcessingException, JSONException {
+        System.out.println("%%%%%%%%%%"+filePath);
+        JSONObject json=new JSONObject(filePath);
+        InputStream imageFile = new FileInputStream(json.getString("filePath"));
+        Metadata meta= ImageMetadataReader.readMetadata(imageFile);
+        for (Directory directory : meta.getDirectories()){
+            System.out.println("  directory=" + directory);
+            List<String> listTag=new ArrayList<>();
+            for (Tag tag : directory.getTags()) {
+                System.out.println("    tag=" + tag);
+                listTag.add(tag.toString());
+            }
+            metadata.put(directory.toString(),listTag);
+        }
 
         return filePath;
     }
