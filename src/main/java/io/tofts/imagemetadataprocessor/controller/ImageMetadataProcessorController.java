@@ -7,9 +7,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,22 +21,22 @@ import java.util.List;
 public class ImageMetadataProcessorController {
     HashMap<String, List<String>> metadata=new HashMap<>();
 
-    @GetMapping("/getimagemetadata")
-    public HashMap<String,List<String>> GetImageMetadata(@RequestBody String filePath) throws IOException, ImageProcessingException, JSONException {
-        System.out.println("%%%%%%%%%%"+filePath);
-        JSONObject json=new JSONObject(filePath);
-        InputStream imageFile = new FileInputStream(json.getString("filePath"));
-        Metadata meta= ImageMetadataReader.readMetadata(imageFile);
-        for (Directory directory : meta.getDirectories()){
-            System.out.println("  directory=" + directory);
-            List<String> listTag=new ArrayList<>();
-            for (Tag tag : directory.getTags()) {
-                System.out.println("    tag=" + tag);
-                listTag.add(tag.toString());
-            }
-            metadata.put(directory.toString(),listTag);
-        }
+    @GetMapping("/getimagemetadata/{filePath}")
+    public String GetImageMetadata(@PathVariable String filePath) throws IOException, ImageProcessingException, JSONException {
+//        System.out.println("%%%%%%%%%%"+filePath);
+//        JSONObject json=new JSONObject(filePath);
+//        InputStream imageFile = new FileInputStream(json.getString("filePath"));
+//        Metadata meta= ImageMetadataReader.readMetadata(imageFile);
+//        for (Directory directory : meta.getDirectories()){
+//            System.out.println("  directory=" + directory);
+//            List<String> listTag=new ArrayList<>();
+//            for (Tag tag : directory.getTags()) {
+//                System.out.println("    tag=" + tag);
+//                listTag.add(tag.toString());
+//            }
+//            metadata.put(directory.toString(),listTag);
+//        }
 
-        return metadata;
+        return filePath;
     }
 }
