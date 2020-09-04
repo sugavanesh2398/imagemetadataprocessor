@@ -21,7 +21,8 @@ import java.util.List;
 public class ImageMetadataProcessorController {
     HashMap<String, List<String>> metadata=new HashMap<>();
 
-    @GetMapping("/getimagemetadata")
+    @RequestMapping("imagemetadataprocessor")
+    @ResponseBody
     public String GetImageMetadata(@RequestBody String filePath) throws IOException, ImageProcessingException, JSONException {
         System.out.println("%%%%%%%%%%"+filePath);
         JSONObject json=new JSONObject(filePath);
