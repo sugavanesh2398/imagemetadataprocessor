@@ -23,6 +23,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Path;
@@ -63,6 +64,10 @@ public class ImageMetadataProcessorController {
 
         return metadata;
     }
+    @RequestMapping(value = "/")
+    public void redirect(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/swagger-ui.html");
+    }
 
     @PostMapping("/convertfile")
     public ResponseEntity FileConverter(@RequestParam("file") MultipartFile inputFile, @RequestParam("format") String format) throws IOException{
@@ -82,7 +87,7 @@ public class ImageMetadataProcessorController {
 
         File outputFile = new File("test."+format);
 
-        String []str=outputFile.getName().split(".");
+        String []str=new String(convFile.getName()).split(".");
         System.out.println(str.length+"----");
         try (InputStream is = new FileInputStream(convFile)) {
             ImageInputStream iis = ImageIO.createImageInputStream(is);
