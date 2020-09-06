@@ -66,6 +66,9 @@ public class ImageMetadataProcessorController {
 
     @PostMapping("/convertfile")
     public ResponseEntity FileConverter(@RequestParam("file") MultipartFile inputFile, @RequestParam("format") String format) throws IOException{
+        BasicAWSCredentials creds = new BasicAWSCredentials("AKIAWH4BFBSOXX2FT5TE", "2dNR42V1bQYsK0YRfxirXkBAU49o2XYXJIAa7q0u");
+
+        AmazonS3Client s3 = new AmazonS3Client(creds);
         File convFile = new File( inputFile.getOriginalFilename() );
         System.out.println(convFile.getName()+"------"+inputFile.getOriginalFilename());
         try (FileOutputStream fos = new FileOutputStream(convFile)) {
@@ -95,6 +98,8 @@ public class ImageMetadataProcessorController {
             exp.printStackTrace();
         }
         System.out.println(outputFile.getName());
+        s3.putObject("image-store-metadata",outputFile.getName(),outputFile);
+
         InputStreamResource resource = new InputStreamResource(new FileInputStream(outputFile));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + outputFile.getName())
