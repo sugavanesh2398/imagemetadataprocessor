@@ -18,7 +18,7 @@ public class SwaggerConfig {
             return new Docket(DocumentationType.SWAGGER_2)
                     .select()
                     .apis(RequestHandlerSelectors.basePackage("io.tofts.imagemetadataprocessor.controller"))
-                    .paths(PathSelectors.ant("/imagemetadataprocessor"))
+                    .paths(PathSelectors.any())
                     .build();
         }
 }
