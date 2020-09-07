@@ -21,7 +21,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.servlet.ServletContext;
@@ -34,6 +37,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 @RestController
@@ -121,4 +125,51 @@ public class ImageMetadataProcessorController {
                 .contentType(mediaType)
                 .body(resource);
     }
+
+    @PostMapping("/imagecompression")
+    public ResponseEntity ImageCompression(@RequestParam MultipartFile inputFile,@RequestParam String format) throws IOException {
+        BasicAWSCredentials creds = new BasicAWSCredentials("AKIAWH4BFBSOXX2FT5TE", "2dNR42V1bQYsK0YRfxirXkBAU49o2XYXJIAa7q0u");
+
+        AmazonS3Client s3 = new AmazonS3Client(creds);
+        File convFile = new File( inputFile.getOriginalFilename());
+        convFile.createNewFile();
+        System.out.println("------");
+        try (FileOutputStream fos = new FileOutputStream(convFile)) {
+            fos.write(inputFile.getBytes());
+            fos.close();
+        }
+        DateTime time=new DateTime();
+        System.out.println(time.toString());
+        BufferedImage image = ImageIO.read(convFile); //change 1
+        System.out.println("^^^^^^"+convFile.getName());
+        File compressedImageFile = new File("compress."+format); //
+        OutputStream os =new FileOutputStream(compressedImageFile);
+
+        Iterator<ImageWriter> writers =  ImageIO.getImageWritersByFormatName(format); //
+        ImageWriter writer = (ImageWriter) writers.next();
+
+        ImageOutputStream ios = ImageIO.createImageOutputStream(os);
+        writer.setOutput(ios);
+
+        ImageWriteParam param = writer.getDefaultWriteParam();
+
+        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        param.setCompressionQuality(0.20f);
+        writer.write(null, new IIOImage(image, null, null), param);
+
+        os.close();
+        ios.close();
+        writer.dispose();
+        String mineType = context.getMimeType(convFile.getName());
+        MediaType mediaType = MediaType.parseMediaType(mineType);
+        s3.putObject("image-store-metadata",compressedImageFile.getName(),compressedImageFile);
+
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(compressedImageFile));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + compressedImageFile.getName())
+                .contentType(mediaType)
+                .body(resource);
+
+    }
+
 }
