@@ -143,7 +143,7 @@ public class ImageMetadataProcessorController {
             System.out.println(time.toString());
             BufferedImage image = ImageIO.read(convFile); //change 1
             System.out.println("^^^^^^" + convFile.getName());
-            File compressedImageFile = new File("compress." + "jpg"); //
+            File compressedImageFile = new File(time.getDayOfYear()+time.getMillis() + ".jpg"); //
             OutputStream os = new FileOutputStream(compressedImageFile);
 
             Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg"); //
