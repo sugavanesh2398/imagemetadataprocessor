@@ -9,6 +9,7 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import org.apache.commons.io.IOUtils;
+import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,9 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Path;
@@ -38,6 +41,8 @@ public class ImageMetadataProcessorController {
     HashMap<String, List<String>> metadata=new HashMap<>();
     @Autowired
     public ServletContext context;
+    @Autowired
+    private HttpServletRequest request;
 
     @PostMapping("/imagemetadataprocessor")
     public HashMap<String, List<String>> GetImageMetadata(@RequestParam("file") MultipartFile filePath) throws IOException, ImageProcessingException, JSONException {
@@ -74,27 +79,28 @@ public class ImageMetadataProcessorController {
         BasicAWSCredentials creds = new BasicAWSCredentials("AKIAWH4BFBSOXX2FT5TE", "2dNR42V1bQYsK0YRfxirXkBAU49o2XYXJIAa7q0u");
 
         AmazonS3Client s3 = new AmazonS3Client(creds);
-        File convFile = new File( inputFile.getOriginalFilename() );
-        System.out.println(convFile.getName()+"------"+inputFile.getOriginalFilename());
+        File convFile = new File( inputFile.getOriginalFilename());
+        convFile.createNewFile();
+        System.out.println("------");
         try (FileOutputStream fos = new FileOutputStream(convFile)) {
             fos.write(inputFile.getBytes());
             fos.close();
         }
-        //MediaType mediaType = MediaTypeUtils.getMediaTypeForFileName(this.servletContext, fileName);
+        DateTime time=new DateTime();
+        System.out.println(time.toString());
         String mineType = context.getMimeType(convFile.getName());
         MediaType mediaType = MediaType.parseMediaType(mineType);
-        //MediaType mediaType = MediaTypeUtils.getMediaTypeForFileName(this.servletContext, fileName);
-
-        File outputFile = new File("test."+format);
-
-        String []str=new String(convFile.getName()).split(".");
-        System.out.println(str.length+"----");
+        File outputFile = new File(time.getDayOfYear()+time.getMillis()+"test."+format);
         try (InputStream is = new FileInputStream(convFile)) {
             ImageInputStream iis = ImageIO.createImageInputStream(is);
-            BufferedImage image = ImageIO.read(iis);
+            BufferedImage image = ImageIO.read(convFile); //change 1
+            BufferedImage newBufferedImage = new BufferedImage(image.getWidth(), //change 2
+                    image.getHeight(), BufferedImage.TYPE_INT_RGB);
+            newBufferedImage.createGraphics().drawImage(image, 0, 0, Color.WHITE, null);
+
             try (OutputStream os = new FileOutputStream(outputFile)) {
                 ImageOutputStream ios = ImageIO.createImageOutputStream(os);
-                ImageIO.write(image, format, ios);
+                ImageIO.write(newBufferedImage, format, ios);  // change3
 
             } catch (Exception exp) {
                 exp.printStackTrace();
