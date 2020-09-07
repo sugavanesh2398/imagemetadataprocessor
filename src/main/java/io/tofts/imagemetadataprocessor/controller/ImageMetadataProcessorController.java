@@ -127,11 +127,11 @@ public class ImageMetadataProcessorController {
     }
 
     @PostMapping("/imagecompression")
-    public ResponseEntity ImageCompression(@RequestParam MultipartFile inputFile,@RequestParam String format) throws IOException {
+    public ResponseEntity ImageCompression(@RequestParam MultipartFile inputFile) throws IOException {
         BasicAWSCredentials creds = new BasicAWSCredentials("AKIAWH4BFBSOXX2FT5TE", "2dNR42V1bQYsK0YRfxirXkBAU49o2XYXJIAa7q0u");
         System.out.println(inputFile.getOriginalFilename());
         AmazonS3Client s3 = new AmazonS3Client(creds);
-        if(!format.equalsIgnoreCase("PNG")) {
+        if(!inputFile.getContentType().split("/")[1].equalsIgnoreCase("PNG")){
             File convFile = new File(inputFile.getOriginalFilename());
             //convFile.createNewFile();   //
             System.out.println("------");
@@ -143,10 +143,10 @@ public class ImageMetadataProcessorController {
             System.out.println(time.toString());
             BufferedImage image = ImageIO.read(convFile); //change 1
             System.out.println("^^^^^^" + convFile.getName());
-            File compressedImageFile = new File("compress." + format); //
+            File compressedImageFile = new File("compress." + "jpg"); //
             OutputStream os = new FileOutputStream(compressedImageFile);
 
-            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(format); //
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg"); //
             ImageWriter writer = (ImageWriter) writers.next();
 
             ImageOutputStream ios = ImageIO.createImageOutputStream(os);
@@ -170,7 +170,8 @@ public class ImageMetadataProcessorController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + compressedImageFile.getName())
                     .contentType(mediaType)
                     .body(resource);
-        }else {
+        }
+        else {
             return ResponseEntity.ok("PNG can't be compressed");
         }
 
