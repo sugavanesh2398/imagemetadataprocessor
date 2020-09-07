@@ -37,13 +37,18 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
-@RequestMapping("/io/tofts")
 public class ImageMetadataProcessorController {
     HashMap<String, List<String>> metadata=new HashMap<>();
     @Autowired
     public ServletContext context;
     @Autowired
     private HttpServletRequest request;
+
+    @RequestMapping(value = "/")
+    @ApiIgnore
+    public void redirect(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/swagger-ui.html");
+    }
 
     @PostMapping("/imagemetadataprocessor")
     public HashMap<String, List<String>> GetImageMetadata(@RequestParam("file") MultipartFile filePath) throws IOException, ImageProcessingException, JSONException {
@@ -70,11 +75,8 @@ public class ImageMetadataProcessorController {
 
         return metadata;
     }
-    @RequestMapping(value = "/")
-    @ApiIgnore
-    public void redirect(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/swagger-ui.html");
-    }
+
+
 
     @PostMapping("/convertfile")
     public ResponseEntity FileConverter(@RequestParam("file") MultipartFile inputFile, @RequestParam("format") String format) throws IOException{
