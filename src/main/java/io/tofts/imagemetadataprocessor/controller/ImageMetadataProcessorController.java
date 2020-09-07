@@ -129,10 +129,10 @@ public class ImageMetadataProcessorController {
     @PostMapping("/imagecompression")
     public ResponseEntity ImageCompression(@RequestParam MultipartFile inputFile,@RequestParam String format) throws IOException {
         BasicAWSCredentials creds = new BasicAWSCredentials("AKIAWH4BFBSOXX2FT5TE", "2dNR42V1bQYsK0YRfxirXkBAU49o2XYXJIAa7q0u");
-
+        System.out.println(inputFile.getOriginalFilename());
         AmazonS3Client s3 = new AmazonS3Client(creds);
-        File convFile = new File( inputFile.getOriginalFilename());
-        convFile.createNewFile();
+        File convFile = new File(inputFile.getOriginalFilename());
+        //convFile.createNewFile();   //
         System.out.println("------");
         try (FileOutputStream fos = new FileOutputStream(convFile)) {
             fos.write(inputFile.getBytes());
