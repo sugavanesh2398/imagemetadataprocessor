@@ -56,16 +56,13 @@ public class ImageMetadataProcessorController {
 
     @PostMapping("/imagemetadataprocessor")
     public HashMap<String, List<String>> GetImageMetadata(@RequestParam("file") MultipartFile filePath) throws IOException, ImageProcessingException, JSONException {
-        BasicAWSCredentials creds = new BasicAWSCredentials("AKIAWH4BFBSOXX2FT5TE", "2dNR42V1bQYsK0YRfxirXkBAU49o2XYXJIAa7q0u");
-
-        AmazonS3Client s3 = new AmazonS3Client(creds);
-        System.out.println("%%%%%%%%%%");
+          System.out.println("%%%%%%%%%%");
         File convFile = new File( filePath.getOriginalFilename() );
         FileOutputStream fos = new FileOutputStream( convFile );
         fos.write( filePath.getBytes() );
         fos.close();
         System.out.println("%%%%%%%%%%"+convFile.getName());
-        s3.putObject("image-store-metadata",convFile.getName(),convFile);
+
         Metadata meta= ImageMetadataReader.readMetadata(convFile);
         for (Directory directory : meta.getDirectories()){
             System.out.println("  directory=" + directory);
@@ -84,9 +81,7 @@ public class ImageMetadataProcessorController {
 
     @PostMapping("/convertfile")
     public ResponseEntity FileConverter(@RequestParam("file") MultipartFile inputFile, @RequestParam("format") String format) throws IOException{
-        BasicAWSCredentials creds = new BasicAWSCredentials("AKIAWH4BFBSOXX2FT5TE", "2dNR42V1bQYsK0YRfxirXkBAU49o2XYXJIAa7q0u");
 
-        AmazonS3Client s3 = new AmazonS3Client(creds);
         File convFile = new File( inputFile.getOriginalFilename());
         convFile.createNewFile();
         System.out.println("------");
@@ -117,7 +112,6 @@ public class ImageMetadataProcessorController {
             exp.printStackTrace();
         }
         System.out.println(outputFile.getName());
-        s3.putObject("image-store-metadata",outputFile.getName(),outputFile);
 
         InputStreamResource resource = new InputStreamResource(new FileInputStream(outputFile));
         return ResponseEntity.ok()
@@ -128,10 +122,8 @@ public class ImageMetadataProcessorController {
 
     @PostMapping("/imagecompression")
     public ResponseEntity ImageCompression(@RequestParam MultipartFile inputFile) throws IOException {
-        BasicAWSCredentials creds = new BasicAWSCredentials("AKIAWH4BFBSOXX2FT5TE", "2dNR42V1bQYsK0YRfxirXkBAU49o2XYXJIAa7q0u");
-        System.out.println(inputFile.getOriginalFilename());
-        AmazonS3Client s3 = new AmazonS3Client(creds);
-        if(!inputFile.getContentType().split("/")[1].equalsIgnoreCase("PNG")){
+         System.out.println(inputFile.getOriginalFilename());
+          if(!inputFile.getContentType().split("/")[1].equalsIgnoreCase("PNG")){
             File convFile = new File(inputFile.getOriginalFilename());
             //convFile.createNewFile();   //
             System.out.println("------");
@@ -163,7 +155,6 @@ public class ImageMetadataProcessorController {
             writer.dispose();
             String mineType = context.getMimeType(convFile.getName());
             MediaType mediaType = MediaType.parseMediaType(mineType);
-            s3.putObject("image-store-metadata", compressedImageFile.getName(), compressedImageFile);
 
             InputStreamResource resource = new InputStreamResource(new FileInputStream(compressedImageFile));
             return ResponseEntity.ok()
